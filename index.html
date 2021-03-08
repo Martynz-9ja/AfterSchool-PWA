@@ -1,0 +1,147 @@
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+        <title>AfterSchool Class Vue.js</title>
+        <script src="https://unpkg.com/vue"></script>
+        <script src="schools.js"></script>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+        <link href="style.css" type="text/css" rel="stylesheet">
+        <link rel="manifest" href="afterSchool.webmanifest">
+    </head>
+    <body>
+        <div id="app">
+            <header class="header">
+                <h1>{{sitename}}</h1>
+                <button @click='showCheckOut' v-show="cartItemCount" class="btn btn-small btn-info btn-popup">
+                    {{cartItemCount}}
+                    <span class="fa fa-cart-plus"></span> Shopping Cart
+                </button>
+            </header>
+            <main class="container">
+                <div v-if='showProduct'>
+                    <div>
+                        <button class="sort-by" @click="sort('subject')" v-bind:class="[sortBy === 'subject' ? sortDirection : '']">Subject</button>
+                        <button class="sort-by" @click="sort('price')" v-bind:class="[sortBy === 'price' ? sortDirection : '']">Price</button>
+                        <button class="sort-by" @click="sort('location')" v-bind:class="[sortBy === 'location' ? sortDirection : '']">Location</button>
+                    </div>
+                    <div class="school">
+                        <div v-for="school in sortedSchools" >
+                            <h2>{{school.subject}} </h2>
+                            <figure>
+                                <img v-bind:src="school.image">
+                            </figure>
+                            <p>{{school.location}}</p>
+                            <p>Price: {{school.price}}</p>
+                            <p>Available stock: {{school.availableInventory - cartCount(school.id)}}</p>
+
+                            <button @click='addToCart(school)' v-if='canAddToCart(school)'>
+                                Add to cart
+                            </button>
+                            
+
+                            <button disabled="disabled" v-else>Add to cart</button>
+                        </div>
+                     </div>   
+                </div>
+                <div v-else>
+                    <h2>Shopping Cart</h2>
+                        
+                        
+              
+                    <p>
+                        <strong>First Name:</strong>
+                        <!-- This input field is bound to 'firstName' in the 'order' object -->
+                        <input v-model.trim="order.firstName" v-on:keypress="isLetter($event)"/>
+                    </p>
+                    <p>
+                        <strong>Last Name:</strong>
+                        <!-- This input field is bound to 'lastName' in the 'order' object -->
+                        <input type="text" v-model.trim="order.lastName"  v-on:keypress="isLetter($event)"/>
+                    </p>
+                    <p>
+                        <strong>Number:</strong>
+                        <input type="number" v-model.number="order.number" />
+                    </p>
+                   
+                    <button v-on:click="submitForm" v-bind:disabled="!formIsValid">Checkout</button>
+                </div>
+            </main>
+        </div>
+    </body>
+    <script>
+        var webstore = new Vue({
+            el:'#app',
+            data:{
+                showProduct:true,
+                sitename:'After School Activities',
+                cart:[],
+                order:{
+                    firstName: '',
+                    lastName:'',
+                    number:''
+                },
+                schools:schools,
+                sortBy:'subject',
+                sortDirection:'asc'
+
+             },
+             methods:{
+                addToCart:function(school){
+                    this.cart.push(school.id);
+                    
+                },
+                showCheckOut(){
+                    this.showProduct = this.showProduct ? false: true;
+                },
+                submitForm() {
+                    alert('Order submitted!')
+                },
+                canAddToCart: function(school){
+                    return school.availableInventory > this.cartCount(school.id);
+                },
+                cartCount(id){
+                    let count = 0;
+                    for(let i = 0; i< this.cart.length; i++){
+                        if(this.cart[i] === id) {
+                            count ++;
+                        }
+                    }
+                    return count;
+                },
+                
+                sort: function(s){
+                    if(s === this.sortBy) {
+                        this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
+                    }
+                    this.sortBy = s;
+                },
+                isLetter(e) {
+                    let char = String.fromCharCode(e.keyCode); // Get the character
+                    if(/^[A-Za-z]+$/.test(char)) return true; // Match with regex 
+                    else e.preventDefault(); // If not match, don't add to input text
+                    }
+        
+                
+             },
+             computed:{
+                cartItemCount: function(){
+                    return this.cart.length;
+                },
+                
+                formIsValid: function(){
+                    return this.order.firstName && this.order.lastName && this.order.number;
+                },
+                sortedSchools: function(){
+                    return this.schools.sort((p1,p2) => {
+                        let modifier = 1;
+                        if(this.sortDirection === 'desc') modifier = -1;
+                        if(p1[this.sortBy] < p2[this.sortBy]) return -1 * modifier; if(p1[this.sortBy] > p2[this.sortBy]) return 1 * modifier;
+                        return 0;
+                    });
+                },
+             
+             }
+        });
+    </script>
+</html>
