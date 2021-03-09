@@ -19,7 +19,7 @@
             <header class="header">
                 <h1>{{sitename}}</h1>
                 <button @click='showCheckOut' v-show="cartItemCount" class="btn btn-small btn-info btn-popup">
-                    {{cartItemCount}}
+                    {{this.cart.legnth}}
                     <span class="fa fa-cart-plus"></span> Shopping Cart
                 </button>
             </header>
